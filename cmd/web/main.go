@@ -47,6 +47,9 @@ func startServer() {
 func parseFlags(app *config.AppConfig) {
 	flag.StringVar(&app.Port, "port", ":8080", "The port the application runs on")
 	flag.StringVar(&app.Version, "version", "0.0.1", "The app version")
+	flag.StringVar(&app.ArcContentBase, "contentbase", "", "arcxp content base (sandbox|staging|production)")
+	flag.StringVar(&app.ArcAccessToken, "accesstoken", "", "arcxp accesstoken (sandbox|staging|production)")
 
 	flag.Parse()
+
 }

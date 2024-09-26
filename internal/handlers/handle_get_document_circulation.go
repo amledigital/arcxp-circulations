@@ -1,9 +1,12 @@
 package handlers
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+
+	"github.com/amledigital/arcxp-circulations/utils/httpclient"
+	"github.com/gin-gonic/gin"
+)
 
 func HandleGetDocumentCirculation(c *gin.Context) {
-
-	c.JSON(200, "hello")
-
+	client := httpclient.NewHttpClient("GET", fmt.Sprintf("%s", Repo.App.ArcContentBase), nil)
 }
