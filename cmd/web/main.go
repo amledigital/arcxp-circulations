@@ -22,6 +22,10 @@ var app config.AppConfig
 func main() {
 
 	parseFlags(&app)
+	startServer()
+}
+
+func startServer() {
 
 	fmt.Printf("Starting server on %s", app.Port)
 
@@ -38,7 +42,6 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil {
 		log.Fatalln(err)
 	}
-
 }
 
 func parseFlags(app *config.AppConfig) {
