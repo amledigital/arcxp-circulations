@@ -2,4 +2,6 @@ Makefile
 docker-compose.yml
 dockerfile
 .env
+*.env
 **/migrations
+docker[\w-]+
