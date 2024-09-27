@@ -31,5 +31,5 @@ func routes() http.Handler {
 
 	})
 
-	return r
+	return csrfHandler(r)
 }
