@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/amledigital/arcxp-circulations/internal/models"
@@ -35,7 +36,7 @@ func (h *HttpClient) FetchCirculationsByID(documentID, website string) (*models.
 		return nil, err
 	}
 
-	req.Header.Set("Authorization", "Bearer "+h.AuthToken)
+	req.Header.Add("Authorization", "Bearer "+h.AuthToken)
 
 	resp, err := client.Do(req)
 
@@ -49,6 +50,7 @@ func (h *HttpClient) FetchCirculationsByID(documentID, website string) (*models.
 		body, err := io.ReadAll(resp.Body)
 
 		if err != nil {
+			log.Fatalln(err)
 			return nil, err
 		}
 
@@ -57,6 +59,7 @@ func (h *HttpClient) FetchCirculationsByID(documentID, website string) (*models.
 		err = json.Unmarshal(body, &c)
 
 		if err != nil {
+			log.Fatalln(err)
 			return nil, err
 		}
 

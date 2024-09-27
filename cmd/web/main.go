@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/amledigital/arcxp-circulations/internal/config"
+	"github.com/amledigital/arcxp-circulations/internal/database/sqldbrepo"
+	"github.com/amledigital/arcxp-circulations/internal/handlers"
 )
 
 const (
@@ -22,11 +26,23 @@ var app config.AppConfig
 func main() {
 
 	parseFlags(&app)
+
 	startServer()
 }
 
 func startServer() {
 
+	app.CTX = context.Background()
+	app.WG = &sync.WaitGroup{}
+	app.MU = &sync.Mutex{}
+	db, err := sqldbrepo.NewSQLConn(&app)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	handlerRepo := handlers.NewHandelerRepo(&app, db)
+
+	handlers.HandlerRepoInit(handlerRepo)
 	fmt.Printf("Starting server on %s", app.Port)
 
 	srv := &http.Server{
@@ -49,7 +65,11 @@ func parseFlags(app *config.AppConfig) {
 	flag.StringVar(&app.Version, "version", "0.0.1", "The app version")
 	flag.StringVar(&app.ArcContentBase, "contentbase", "", "arcxp content base (sandbox|staging|production)")
 	flag.StringVar(&app.ArcAccessToken, "accesstoken", "", "arcxp accesstoken (sandbox|staging|production)")
+	flag.StringVar(&app.ArcWebsite, "arcwebsite", "910news", "arcxp website id (910news|mynorth)")
+	flag.StringVar(&app.DSN, "DSN", "", "the database connection string for the sql driver")
 
 	flag.Parse()
+
+	fmt.Printf("%+v", app)
 
 }

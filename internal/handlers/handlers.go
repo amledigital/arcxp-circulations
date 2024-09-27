@@ -1,14 +1,24 @@
 package handlers
 
-import "github.com/amledigital/arcxp-circulations/internal/config"
+import (
+	"github.com/amledigital/arcxp-circulations/internal/config"
+	"github.com/amledigital/arcxp-circulations/internal/database"
+)
 
 type HandlerRepo struct {
-	app *config.AppConfig
-	db  database.dbrepo
+	App *config.AppConfig
+	DB  database.DBRepo
 }
 
-var app *HandlerRepo
+var Repo *HandlerRepo
 
-func NewHandelerRepo(a *config.AppConfig) {
-	app = a
+func NewHandelerRepo(a *config.AppConfig, conn database.DBRepo) *HandlerRepo {
+	return &HandlerRepo{
+		App: a,
+		DB:  conn,
+	}
+}
+
+func HandlerRepoInit(hr *HandlerRepo) {
+	Repo = hr
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/amledigital/arcxp-circulations/internal/handlers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,6 +11,8 @@ func routes() http.Handler {
 	r := gin.Default()
 
 	api := r.Group("/api/v1")
+
+	api.GET("/:documentID", handlers.Repo.HandleGetDocumentCirculation)
 
 	api.GET("/healthcheck", func(c *gin.Context) {
 		type healthcheck struct {
