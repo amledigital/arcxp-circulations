@@ -12,6 +12,8 @@ func routes() http.Handler {
 
 	api := r.Group("/api/v1")
 
+	api.GET("/arc-section/:arcWebsite", handlers.Repo.HandleGetArcSection)
+
 	api.GET("/:documentID", handlers.Repo.HandleGetDocumentCirculation)
 
 	api.GET("/healthcheck", func(c *gin.Context) {

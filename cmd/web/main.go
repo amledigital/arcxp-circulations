@@ -12,6 +12,7 @@ import (
 	"github.com/amledigital/arcxp-circulations/internal/config"
 	"github.com/amledigital/arcxp-circulations/internal/database/sqldbrepo"
 	"github.com/amledigital/arcxp-circulations/internal/handlers"
+	"github.com/amledigital/arcxp-circulations/internal/repository/sqlrepo"
 )
 
 const (
@@ -40,7 +41,9 @@ func startServer() {
 		log.Fatalln(err)
 	}
 
-	handlerRepo := handlers.NewHandelerRepo(&app, db)
+	dbRepo := sqlrepo.NewSQLRepo(&app, db.Conn)
+
+	handlerRepo := handlers.NewHandelerRepo(&app, dbRepo)
 
 	handlers.HandlerRepoInit(handlerRepo)
 	fmt.Printf("Starting server on %s", app.Port)
