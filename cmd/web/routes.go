@@ -12,9 +12,13 @@ func routes() http.Handler {
 
 	api := r.Group("/api/v1")
 
+	api.GET("/fetch-token", handlers.Repo.HandleFetchCSRFToken)
+
 	api.GET("/arc-section/:arcWebsite", handlers.Repo.HandleGetArcSection)
 
 	api.GET("/:documentID", handlers.Repo.HandleGetDocumentCirculation)
+
+	api.PUT("/circulations/:documentID", handlers.Repo.HandlePutCirculateDocument)
 
 	api.GET("/healthcheck", func(c *gin.Context) {
 		type healthcheck struct {

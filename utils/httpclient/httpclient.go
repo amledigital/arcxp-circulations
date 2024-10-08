@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/amledigital/arcxp-circulations/internal/models"
 )
@@ -27,10 +28,14 @@ func NewHttpClient(method, url, token string, data []byte) *HttpClient {
 	}
 }
 
-func (h *HttpClient) FetchArticlesBySectionID(sectionID string) (contentElements []interface{}, more int, err error) {
+func (h *HttpClient) FetchArticlesBySectionID(from ...int) (contentElements *models.ContentApiFetchResult, more int, err error) {
 
-	fmt.Println(h.URL)
+	if len(from) > 0 {
+		var val int
 
+		val = from[0]
+		h.URL = strings.Join([]string{h.URL, fmt.Sprintf("from=%d", val)}, "&")
+	}
 	client := &http.Client{}
 
 	req, err := http.NewRequest(h.Method, h.URL, bytes.NewReader(h.Body))
@@ -58,18 +63,15 @@ func (h *HttpClient) FetchArticlesBySectionID(sectionID string) (contentElements
 			return nil, 0, err
 		}
 
-		var c = make(map[string]any)
+		var c = &models.ContentApiFetchResult{}
 
 		err = json.Unmarshal(body, &c)
 
 		if err != nil {
-			log.Fatalln(err)
 			return nil, 0, err
 		}
 
-		fmt.Println(c)
-
-		return nil, 0, nil
+		return c, c.Next, nil
 
 	}
 

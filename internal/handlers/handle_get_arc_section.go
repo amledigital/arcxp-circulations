@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/url"
+	"strconv"
 
 	"github.com/amledigital/arcxp-circulations/utils/httpclient"
 	"github.com/gin-gonic/gin"
@@ -14,25 +16,46 @@ type Nested struct {
 	Query Query  `json:"query"`
 }
 
-type Must struct {
-	Term  map[string]any `json:"term,omitempty"`
-	Terms map[string]any `json:"terms,omitempty"`
+type NestedParent struct {
+	Nested `json:"nested"`
 }
 
-type MultiMust struct {
-	Terms map[string]any `json:"terms,omitempty"`
+type Term map[string]string
+
+type Terms map[string]string
+
+type Must interface {
+	Term | Terms | Nested
 }
+
+type MustSlice []any
 
 type Bool struct {
-	Must []map[string]any `json:"must,omitempty"`
+	Must MustSlice `json:"must,omitempty"`
 }
 
 type Query struct {
 	Bool Bool `json:"bool"`
 }
 
+func newElasticQuery() *ElasticQuery {
+	es := &ElasticQuery{}
+
+	es.Query = Query{}
+
+	es.Query.Bool = Bool{}
+
+	es.Query.Bool.Must = MustSlice{}
+
+	return es
+}
+
 type ElasticQuery struct {
 	Query `json:"query"`
+}
+
+func (eq *ElasticQuery) appendToMust(v any) {
+	eq.Query.Bool.Must = append(eq.Bool.Must, v)
 }
 
 func (hr *HandlerRepo) HandleGetArcSection(c *gin.Context) {
@@ -41,62 +64,63 @@ func (hr *HandlerRepo) HandleGetArcSection(c *gin.Context) {
 
 	website := c.Param("website")
 
+	from, err := strconv.Atoi(c.Query("from"))
+
+	if err != nil {
+		from = 0
+	}
+
 	if website == "" {
 		website = hr.App.ArcWebsite
 	}
 
-	var q ElasticQuery
+	var q = newElasticQuery()
 
-	revisionTerm := make(map[string]any)
+	var revisionTerm = make(map[string]any)
 
 	revisionTerm["revision.published"] = true
 
-	q.Query.Bool.Must = append(q.Query.Bool.Must, map[string]interface{}{"term": revisionTerm})
+	q.appendToMust(map[string]interface{}{"term": revisionTerm})
 
-	typeTerm := make(map[string]any)
+	var typeTerm = make(map[string]any)
 
 	typeTerm["type"] = "story"
 
-	q.Query.Bool.Must = append(q.Query.Bool.Must, map[string]interface{}{"term": typeTerm})
+	q.appendToMust(map[string]interface{}{"term": typeTerm})
 
-	var ns Nested
+	var n Nested
 
-	ns.Path = "taxonomy.sections"
+	n.Path = "taxonomy.sections"
 
-	ns.Query.Bool.Must = []map[string]any{}
+	n.Query.Bool.Must = []any{}
 
-	sectionTerm := make(map[string]any)
+	n.Query.Bool.Must = append(n.Query.Bool.Must, map[string]any{
+		"terms": map[string]any{"taxonomy.sections._id": []string{sectionID}},
+	})
 
-	sectionTerm["terms"] = map[string]any{
-		"taxonomy.sections._id": []string{sectionID},
-	}
+	n.Query.Bool.Must = append(n.Query.Bool.Must, map[string]any{"term": map[string]any{"taxonomy.sections._website": website}})
 
-	ns.Query.Bool.Must = append(ns.Query.Bool.Must, map[string]interface{}{"terms": sectionTerm})
-
-	nsSectionWebsite := make(map[string]any)
-
-	nsSectionWebsite["taxonomy.sections._website"] = website
-
-	ns.Query.Bool.Must = append(ns.Query.Bool.Must, map[string]interface{}{"term": nsSectionWebsite})
-
-	q.Query.Bool.Must = append(q.Query.Bool.Must, map[string]interface{}{"nested": ns})
-
+	q.appendToMust(NestedParent{n})
 	out, err := json.Marshal(q)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	client := httpclient.NewHttpClient("GET", fmt.Sprintf("%s/content/v4/search?website=%s&body=%s",
-		hr.App.ArcContentBase,
-		hr.App.ArcWebsite, out), hr.App.ArcAccessToken, nil)
+	client := httpclient.NewHttpClient("GET",
+		fmt.Sprintf("%s/content/v4/search?website=%s&body=%s&sort=%s",
+			hr.App.ArcContentBase,
+			hr.App.ArcWebsite,
+			url.QueryEscape((string(out))),
+			url.QueryEscape("publish_date:desc")),
+		hr.App.ArcAccessToken,
+		nil)
 
-	articles, next, err := client.FetchArticlesBySectionID(sectionID)
+	articles, next, err := client.FetchArticlesBySectionID(from)
 
 	c.JSON(200, map[string]interface{}{
 		"articles": articles,
 		"next":     next,
 		"error":    err,
 	})
-
 }
