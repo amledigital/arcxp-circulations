@@ -6,18 +6,19 @@ import (
 	"log"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/amledigital/arcxp-circulations/utils/httpclient"
 	"github.com/gin-gonic/gin"
 )
 
 type Nested struct {
-	Path  string `json:"path"`
-	Query Query  `json:"query"`
+	Path  string `json:"path,omitempty"`
+	Query Query  `json:"query,omitempty"`
 }
 
 type NestedParent struct {
-	Nested `json:"nested"`
+	Nested `json:"nested,omitempty"`
 }
 
 type Term map[string]string
@@ -35,7 +36,7 @@ type Bool struct {
 }
 
 type Query struct {
-	Bool Bool `json:"bool"`
+	Bool Bool `json:"bool,omitempty"`
 }
 
 func newElasticQuery() *ElasticQuery {
@@ -51,7 +52,7 @@ func newElasticQuery() *ElasticQuery {
 }
 
 type ElasticQuery struct {
-	Query `json:"query"`
+	Query `json:"query,omitempty"`
 }
 
 func (eq *ElasticQuery) appendToMust(v any) {
@@ -61,6 +62,14 @@ func (eq *ElasticQuery) appendToMust(v any) {
 func (hr *HandlerRepo) HandleGetArcSection(c *gin.Context) {
 
 	sectionID := c.Query("sectionID")
+
+	filter := c.Query("filter")
+
+	var filterParams []string
+
+	if len(filter) > 0 {
+		filterParams = strings.Split(filter, ",")
+	}
 
 	website := c.Param("website")
 
@@ -107,8 +116,14 @@ func (hr *HandlerRepo) HandleGetArcSection(c *gin.Context) {
 		log.Fatalln(err)
 	}
 
+	var filterString = ""
+
+	if len(filterParams) > 0 {
+		filterString = fmt.Sprintf("&_sourceInclude=%s", url.QueryEscape(strings.Join(filterParams, ",")))
+	}
+
 	client := httpclient.NewHttpClient("GET",
-		fmt.Sprintf("%s/content/v4/search?website=%s&body=%s&sort=%s",
+		fmt.Sprintf("%s/content/v4/search?website=%s&body=%s&sort=%s"+filterString,
 			hr.App.ArcContentBase,
 			hr.App.ArcWebsite,
 			url.QueryEscape((string(out))),

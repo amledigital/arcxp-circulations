@@ -1,97 +1,97 @@
 package models
 
 type PrimarySection struct {
-	ID                   string      `json:"_id"`
-	Website              string      `json:"_website"`
+	ID                   string      `json:"_id,omitempty"`
+	Website              string      `json:"_website,omitempty"`
 	AdditionalProperties interface{} `json:"additional_properties"`
 	Description          string      `json:"description,omitempty"`
-	Name                 string      `json:"name"`
+	Name                 string      `json:"name,omitempty"`
 	Parent               interface{} `json:"parent,omitempty"`
 	ParentID             string      `json:"parent_id,omitempty"`
-	Path                 string      `json:"path"`
-	Type                 string      `json:"type"`
-	Version              string      `json:"version"`
+	Path                 string      `json:"path,omitempty"`
+	Type                 string      `json:"type,omitempty"`
+	Version              string      `json:"version,omitempty"`
 }
 
 type PrimarySite struct {
-	ID                   string      `json:"_id"`
+	ID                   string      `json:"_id,omitempty"`
 	AdditionalProperties interface{} `json:"additional_properties,omitempty"`
 	Description          string      `json:"description,omitempty"`
-	Name                 string      `json:"name"`
+	Name                 string      `json:"name,omitempty"`
 	ParentID             string      `json:"parent_id,omitempty"`
-	Path                 string      `json:"path"`
-	Type                 string      `json:"type"`
-	Version              string      `json:"version"`
+	Path                 string      `json:"path,omitempty"`
+	Type                 string      `json:"type,omitempty"`
+	Version              string      `json:"version,omitempty"`
 }
 
 type Section struct {
-	ID                   string      `json:"_id"`
-	Website              string      `json:"_website"`
-	WebsiteSectionID     string      `json:"_website_section_id"` // concats website.WebsiteSectionID
+	ID                   string      `json:"_id,omitempty"`
+	Website              string      `json:"_website,omitempty"`
+	WebsiteSectionID     string      `json:"_website_section_id,omitempty"` // concats website.WebsiteSectionID
 	AdditionalProperties interface{} `json:"additional_properties,omitempty"`
 	Description          string      `json:"description,omitempty"`
-	Name                 string      `json:"name"`
-	Parent               interface{} `json:"parent"`
-	ParentID             string      `json:"parent_id"`
-	Path                 string      `json:"path"`
-	Type                 string      `json:"type"`
-	Version              string      `json:"version"`
+	Name                 string      `json:"name,omitempty"`
+	Parent               interface{} `json:"parent,omitempty"`
+	ParentID             string      `json:"parent_id,omitempty"`
+	Path                 string      `json:"path,omitempty"`
+	Type                 string      `json:"type,omitempty"`
+	Version              string      `json:"version,omitempty"`
 }
 
 type Taxonomy struct {
-	PrimarySection `json:"primary_section"`
-	PrimarySite    `json:"primary_site"`
-	Sections       []Section `json:"sections"`
+	PrimarySection `json:"primary_section,omitempty"`
+	PrimarySite    `json:"primary_site,omitempty"`
+	Sections       []Section `json:"sections,omitempty"`
 }
 
 type Source struct {
-	System     string `json:"system"`
-	Name       string `json:"name"`
-	SourceType string `json:"source_type"`
+	System     string `json:"system,omitempty"`
+	Name       string `json:"name,omitempty"`
+	SourceType string `json:"source_type,omitempty"`
 }
 
 type Owner struct {
-	Sponsored bool   `json:"sponsored"`
-	ID        string `json:"id"`
+	Sponsored bool   `json:"sponsored,omitempty"`
+	ID        string `json:"id,omitempty"`
 }
 type Distributor struct {
-	Name        string `json:"name"`
-	Category    string `json:"category"`
+	Name        string `json:"name,omitempty"`
+	Category    string `json:"category,omitempty"`
 	SubCategory string `json:"subcategory,omitempty"`
 }
 
 type WebsitesWebSiteSection struct {
-	Path   string `json:"path"`
+	Path   string `json:"path,omitempty"`
 	Parent struct {
 		Default string `json:"default,omitempty"`
-	} `json:"parent"`
-	Website              string      `json:"_website"`
-	ParentID             string      `json:"parent_id"`
-	Name                 string      `json:"name"`
+	} `json:"parent,omitempty"`
+	Website              string      `json:"_website,omitempty"`
+	ParentID             string      `json:"parent_id,omitempty"`
+	Name                 string      `json:"name,omitempty"`
 	Description          string      `json:"description,omitempty"`
-	ID                   string      `json:"_id"`
-	AdditionalProperties interface{} `json:"additional_properties"`
-	WebsiteSectionID     string      `json:"_website_section_id"`
-	Type                 string      `json:"type"`
-	Version              string      `json:"version"`
+	ID                   string      `json:"_id,omitempty"`
+	AdditionalProperties interface{} `json:"additional_properties,omitempty"`
+	WebsiteSectionID     string      `json:"_website_section_id,omitempty"`
+	Type                 string      `json:"type,omitempty"`
+	Version              string      `json:"version,omitempty"`
 }
 type Website struct {
-	WebsiteURL string                 `json:"website_url"`
-	Section    WebsitesWebSiteSection `json:"website_section"`
+	WebsiteURL string                 `json:"website_url,omitempty"`
+	Section    WebsitesWebSiteSection `json:"website_section,omitempty"`
 }
 
 type Websites map[string]Website
 
 type Article struct {
-	ID          string      `json:"_id"`
-	Headlines   interface{} `json:"headlines"`
-	Source      `json:"source"`
-	Taxonomy    `json:"taxonomy"`
-	Owner       `json:"owner"`
-	Distributor `json:"distributor"`
-	CreatedDate string `json:"created_date"`
-	PublishDate string `json:"publish_date"`
-	Website     string `json:"website"`
-	WebsiteURL  string `json:"website_url"`
-	Websites    `json:"websites"`
+	ID          string      `json:"_id,omitempty"`
+	Headlines   interface{} `json:"headlines,omitempty"`
+	Source      `json:"source,omitempty"`
+	Taxonomy    `json:"taxonomy,omitempty"`
+	Owner       `json:"owner,omitempty"`
+	Distributor `json:"distributor,omitempty"`
+	CreatedDate string `json:"created_date,omitempty"`
+	PublishDate string `json:"publish_date,omitempty"`
+	Website     string `json:"website,omitempty"`
+	WebsiteURL  string `json:"website_url,omitempty"`
+	Websites    `json:"websites,omitempty"`
 }
