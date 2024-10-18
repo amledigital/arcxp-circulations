@@ -63,6 +63,6 @@ func (hr *HandlerRepo) HandlePutCirculateDocument(c *gin.Context) {
 
 	websiteURL := c.Query("website_url")
 
-	c.JSON(200, documentID)
+	c.JSON(200, websiteURL)
 
 }

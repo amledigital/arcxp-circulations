@@ -123,7 +123,7 @@ func (hr *HandlerRepo) HandleGetArcSection(c *gin.Context) {
 	}
 
 	client := httpclient.NewHttpClient("GET",
-		fmt.Sprintf("%s/content/v4/search?website=%s&body=%s&sort=%s"+filterString,
+		fmt.Sprintf("%s/content/v4/search?website=%s&body=%s&sort=%s&size=100"+filterString,
 			hr.App.ArcContentBase,
 			hr.App.ArcWebsite,
 			url.QueryEscape((string(out))),
