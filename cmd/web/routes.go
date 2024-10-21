@@ -14,6 +14,8 @@ func routes() http.Handler {
 
 	api.GET("/fetch-token", handlers.Repo.HandleFetchCSRFToken)
 
+	api.GET("/arc-section/all", handlers.Repo.HandleGetAllSections)
+
 	api.GET("/arc-section/:arcWebsite", handlers.Repo.HandleGetArcSection)
 
 	api.GET("/:documentID", handlers.Repo.HandleGetDocumentCirculation)
