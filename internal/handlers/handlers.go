@@ -22,3 +22,11 @@ func NewHandelerRepo(a *config.AppConfig, conn repository.DBRepository) *Handler
 func HandlerRepoInit(hr *HandlerRepo) {
 	Repo = hr
 }
+
+func (hr *HandlerRepo) ConstructEnvelope(key string, payload any) map[string]any {
+	envelope := make(map[string]any)
+
+	envelope[key] = payload
+
+	return envelope
+}

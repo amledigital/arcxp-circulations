@@ -1,19 +1,15 @@
 package handlers
 
 import (
-	"strings"
+	"encoding/json"
+	"fmt"
+	"io"
 
+	"github.com/amledigital/arcxp-circulations/internal/models"
+	"github.com/amledigital/arcxp-circulations/utils/httpclient"
 	"github.com/gin-gonic/gin"
 	"github.com/justinas/nosurf"
 )
-
-type DocumentCirculationParams struct {
-	DocumentID              string
-	MigrateToList           []string
-	WebsiteID               string
-	WebsitePrimarySectionID string
-	WebsiteURL              string
-}
 
 func (hr *HandlerRepo) HandlePutCirculateDocument(c *gin.Context) {
 
@@ -24,45 +20,36 @@ func (hr *HandlerRepo) HandlePutCirculateDocument(c *gin.Context) {
 		return
 	}
 
-	var params DocumentCirculationParams
+	var cd *models.Circulation
 
-	params.DocumentID = c.Query("documentID")
-	params.MigrateToList = strings.Split(c.Param("sections"), ",")
-	params.WebsiteID = c.Query("website_id")
-	params.WebsitePrimarySectionID = c.Query("primary_section")
-	params.WebsiteURL = c.Query("website_url")
+	body, err := io.ReadAll(c.Request.Body)
 
-	// do some quick validation
-
-	if params.WebsiteID == "" {
-		params.WebsiteID = hr.App.ArcWebsite
-	}
-
-	if params.WebsitePrimarySectionID == "" {
-		params.WebsitePrimarySectionID = params.MigrateToList[0]
-	}
-
-	if params.DocumentID == "" || len(params.MigrateToList) == 0 || params.WebsiteID == "" || params.WebsitePrimarySectionID == "" || params.WebsiteURL == "" {
-		c.AbortWithStatusJSON(400, map[string]any{"error": "missing a document circulation parameter"})
+	if err != nil {
+		c.AbortWithStatusJSON(400, hr.ConstructEnvelope("error", err.Error()))
 		return
 	}
 
-	// build circulation HandlePutCirculateDocument
-
-	primarySection := c.Query("primary_section")
-	if len(primarySection) == 0 || primarySection == "" {
-		c.AbortWithStatusJSON(400, map[string]any{"error": "no primary section provided"})
+	if err = json.Unmarshal(body, &cd); err != nil {
+		c.AbortWithStatusJSON(400, hr.ConstructEnvelope("error", err.Error()))
 		return
 	}
 
-	websiteID := c.Query("website_id")
+	client := httpclient.NewHttpClient("PUT",
+		fmt.Sprintf("%s/draft/v1/%s/%s/circulation/%s",
+			hr.App.ArcContentBase,
+			"story",
+			cd.DocumentID,
+			hr.App.ArcWebsite),
+		hr.App.ArcAccessToken,
+		body)
 
-	if len(websiteID) == 0 || websiteID == "" {
-		websiteID = hr.App.ArcWebsite
+	opResponse, err := client.CirculateADocument()
+
+	if err != nil {
+		c.AbortWithStatusJSON(400, hr.ConstructEnvelope("error", err.Error()))
+		return
 	}
 
-	websiteURL := c.Query("website_url")
-
-	c.JSON(200, documentID)
+	c.JSON(200, opResponse)
 
 }

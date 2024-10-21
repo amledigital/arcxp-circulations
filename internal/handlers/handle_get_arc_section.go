@@ -63,6 +63,15 @@ func (hr *HandlerRepo) HandleGetArcSection(c *gin.Context) {
 
 	sectionID := c.Query("sectionID")
 
+	parsedSectionID, err := url.ParseQuery(c.Request.URL.Path)
+
+	if err != nil {
+		c.AbortWithStatusJSON(400, hr.ConstructEnvelope("error", "there was an error parsing the query"))
+		return
+	}
+
+	fmt.Println(parsedSectionID)
+
 	filter := c.Query("filter")
 
 	var filterParams []string

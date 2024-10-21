@@ -13,14 +13,16 @@ import (
 )
 
 type HttpClient struct {
-	Method    string `json:"method"`
-	URL       string `json:"url"`
-	Body      []byte `json:"data"`
-	AuthToken string `json:"-"`
+	Client    *http.Client `json:"-"`
+	Method    string       `json:"method"`
+	URL       string       `json:"url"`
+	Body      []byte       `json:"data"`
+	AuthToken string       `json:"-"`
 }
 
 func NewHttpClient(method, url, token string, data []byte) *HttpClient {
 	return &HttpClient{
+		Client:    &http.Client{},
 		Method:    method,
 		URL:       url,
 		Body:      data,
@@ -117,6 +119,40 @@ func (h *HttpClient) FetchCirculationsByID(documentID, website string) (*models.
 		}
 
 		return c, nil
+
+	}
+
+	return nil, nil
+
+}
+
+func (h *HttpClient) CirculateADocument() (*models.Circulation, error) {
+
+	req, err := http.NewRequest(h.Method, h.URL, bytes.NewReader(h.Body))
+
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+h.AuthToken)
+
+	resp, err := h.Client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Body != nil {
+
+		defer resp.Body.Close()
+
+		var opResult *models.Circulation
+
+		if err = json.NewDecoder(resp.Body).Decode(&opResult); err != nil {
+			return nil, err
+		}
+
+		return opResult, nil
 
 	}
 

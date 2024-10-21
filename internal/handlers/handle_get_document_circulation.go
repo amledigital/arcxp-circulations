@@ -12,8 +12,6 @@ func (hr *HandlerRepo) HandleGetDocumentCirculation(c *gin.Context) {
 
 	documentID := c.Param("documentID")
 
-	fmt.Println(documentID)
-
 	circChan := make(chan *models.Circulation)
 	errorChan := make(chan error)
 	doneChan := make(chan bool)
@@ -61,7 +59,6 @@ func (hr *HandlerRepo) HandleGetDocumentCirculation(c *gin.Context) {
 			data := map[string]interface{}{}
 			data["circulations"] = circulations
 			c.JSON(200, data)
-			return
 		}
 	}
 
