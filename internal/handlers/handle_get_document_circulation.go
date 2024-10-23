@@ -56,9 +56,7 @@ func (hr *HandlerRepo) HandleGetDocumentCirculation(c *gin.Context) {
 			close(circChan)
 			close(errorChan)
 			close(doneChan)
-			data := map[string]interface{}{}
-			data["circulations"] = circulations
-			c.JSON(200, data)
+			c.JSON(200, hr.ConstructEnvelope("circulations", circulations))
 		}
 	}
 
